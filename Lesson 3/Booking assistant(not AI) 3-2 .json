@@ -1,0 +1,324 @@
+{
+  "name": "Booking assistant(not AI) -",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Booking form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Start Date",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Time",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "00:00"
+                  },
+                  {
+                    "option": "01:00"
+                  },
+                  {
+                    "option": "02:00"
+                  },
+                  {
+                    "option": "03:00"
+                  },
+                  {
+                    "option": "04:00"
+                  },
+                  {
+                    "option": "05:00"
+                  },
+                  {
+                    "option": "06:00"
+                  },
+                  {
+                    "option": "07:00"
+                  },
+                  {
+                    "option": "08:00"
+                  },
+                  {
+                    "option": "09:00"
+                  },
+                  {
+                    "option": "10:00"
+                  },
+                  {
+                    "option": "11:00"
+                  },
+                  {
+                    "option": "12:00"
+                  },
+                  {
+                    "option": "13:00"
+                  },
+                  {
+                    "option": "14:00"
+                  },
+                  {
+                    "option": "15:00"
+                  },
+                  {
+                    "option": "16:00"
+                  },
+                  {
+                    "option": "17:00"
+                  },
+                  {
+                    "option": "18:00"
+                  },
+                  {
+                    "option": "19:00"
+                  },
+                  {
+                    "option": "20:00"
+                  },
+                  {
+                    "option": "21:00"
+                  },
+                  {
+                    "option": "22:00"
+                  },
+                  {
+                    "option": "23:00"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Full Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Phone",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d44ace2d-59cb-4f90-8c16-f7ef1c98e465",
+      "name": "On form submission",
+      "webhookId": "f375cda8-9c12-46bc-9fad-fe87e83cc7ed"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "ashebushev.lt@gmail.com",
+          "mode": "id"
+        },
+        "timeMin": "={{ ($json['Start Date']+'T'+$json['Time']+':00')}}",
+        "timeMax": "={{ DateTime.fromISO($json['Start Date']+'T'+$json['Time']+':00').plus({hours:1}).toISO()}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "512c5296-97e5-4e3b-9747-1e8adfdfed91",
+      "name": "Get many events",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "Y4IcudR5F4Nvb39k",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "209e03ce-c239-46db-b386-ef9790d2e49a",
+              "leftValue": "={{ $json.keys() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "80f21430-d66d-4c2e-8bb4-e7854e8bd4d1",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        672,
+        96
+      ],
+      "id": "bdb5a8df-bd78-4e0d-971a-fca3ec1a6a29",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Booking failed",
+        "completionMessage": "That time slot is already booked. Please go back and choose another time",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        672,
+        208
+      ],
+      "id": "f39d7bdd-98e4-49db-bafb-08975875d630",
+      "name": "Form",
+      "webhookId": "ab40147e-e9e2-4f29-84ba-b7deb12e4866"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "ashebushev.lt@gmail.com",
+          "mode": "id"
+        },
+        "start": "={{ ($('On form submission').item.json['Start Date'] +'T'+$('On form submission').item.json['Time']+':00')}}",
+        "end": "={{ DateTime.fromISO($('On form submission').item.json['Start Date'] +'T'+$('On form submission').item.json['Time']+':00').plus({hours:1}).toISO()}}",
+        "additionalFields": {
+          "summary": "=Appointment-{{$('On form submission').item.json['Full Name'] }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "6fcbcb5c-5c5c-472f-b78f-e31ac02a964d",
+      "name": "Book an appointment",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "Y4IcudR5F4Nvb39k",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Appointment booked successfully",
+        "completionMessage": "Your appointment is booked successfully",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        896,
+        -96
+      ],
+      "id": "bf04d394-cbab-4fde-b068-12cb6e41dc98",
+      "name": "Form1",
+      "webhookId": "a87a12c6-285c-485d-9423-9a2d1d8cd8dd"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Book an appointment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Book an appointment": {
+      "main": [
+        [
+          {
+            "node": "Form1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e194aaa0-7160-4c00-a675-09a1c6fd52d2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8560c21db3075da51d1ecd410b47b530fab3cdfc810b51050fb46162e4eddc50"
+  },
+  "nodeGroups": [],
+  "id": "4FL28MaFVoCtq41s",
+  "tags": []
+}

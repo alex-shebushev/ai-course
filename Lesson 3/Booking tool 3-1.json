@@ -1,0 +1,194 @@
+{
+  "name": "Booking tool 3-1",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5a39b0db-4b6c-476a-a2dd-d7d4908a9edc",
+      "name": "When chat message received",
+      "webhookId": "f3c2a0d3-f310-4a78-b0a8-6afd503fc707"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "#Role\nYou are a booking assistant that helps users check availability, create, modify, and cancel reservations through the connected scheduling tools\n \n#Instructions\nFollow next steps to book an appointment for a user\n1. Ask about preffered day and time\n2. Use 'Get calendar data' to identify free slots for user\n3. Show possible time slots, if there is no any slot, start from step 1\n4. Ask user's email, full name, phone number to book the slot\n5. Use tool 'Set event in calendar' to create an event in the calendar\n\n#Rules\nUse Lithuanian time zone to book time\nAppointment will take 1 hour\nDo not make things\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "b83620cc-99c4-4a53-af23-17770b6023dd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-5",
+          "cachedResultName": "Claude Sonnet 5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        96,
+        208
+      ],
+      "id": "67426131-8886-497a-b3f9-79811c0c496a",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "tUVYCmopqKl1JDh2",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        208
+      ],
+      "id": "a4e1dc06-2560-4d2e-aeb9-3e8457e1fb15",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "ashebushev.lt@gmail.com",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        144
+      ],
+      "id": "70e0fec5-2aed-4274-bd88-aa45b0ad64b6",
+      "name": "Get calendar data",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "Y4IcudR5F4Nvb39k",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "ashebushev.lt@gmail.com",
+          "mode": "id"
+        },
+        "start": "={{ DateTime.fromISO($fromAI('start_date', 'ISO 8601 start datetime with offset', 'string')).toISO() }}",
+        "end": "={{ DateTime.fromISO($fromAI('start_date', 'ISO 8601 start datetime with offset', 'string')).plus({ hours: 1 }).toISO()}}",
+        "additionalFields": {
+          "summary": "=Appointment-{{$fromAI('full_name', 'Extract full name', 'string')}}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        208
+      ],
+      "id": "da6fc3bc-5ccf-4c7d-b82b-39448024ae93",
+      "name": "Set event in calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "Y4IcudR5F4Nvb39k",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get calendar data": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set event in calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ce973198-b451-4e89-af96-51aabf2ab1e0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8560c21db3075da51d1ecd410b47b530fab3cdfc810b51050fb46162e4eddc50"
+  },
+  "nodeGroups": [],
+  "id": "XrW9e1zJ33hV7k4H",
+  "tags": []
+}
