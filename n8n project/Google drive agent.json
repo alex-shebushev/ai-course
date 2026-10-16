@@ -1,0 +1,625 @@
+{
+  "name": "Google drive agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1m0wW0JpX6R4EUbWuiEEgY5Ulzh7qqhAj",
+          "mode": "list",
+          "cachedResultName": "For agent",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1m0wW0JpX6R4EUbWuiEEgY5Ulzh7qqhAj"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        256
+      ],
+      "id": "d6f360ee-a277-44a2-84e0-be0bc5768ce0",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GaAVd5sf780yiz27",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 3,
+        "output": "={{\n(() => {\n  const ext = $json.fileExtension;\n  if (ext == \"txt\") return 0; \n  if (ext == \"pdf\") return 1;\n  if (ext == \"docx\") return 2;\n  return 3;\n})();\n}}"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -272,
+        240
+      ],
+      "id": "6051b2b4-8cff-4895-9a7b-a07600ecc80a",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        512,
+        288
+      ],
+      "id": "bdf9218f-9d10-4998-aee5-0e3887deb224",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        128,
+        16
+      ],
+      "id": "563bc3cb-327c-4edc-8788-8bd1d347409c",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0ca871d4-d159-4e66-b5a3-060a3d3fd314",
+              "name": "data",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        272,
+        464
+      ],
+      "id": "86f38d6a-ce59-44ac-b37e-1ece0e65ca7f",
+      "name": "Set file content to output"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5c4eb5f9-8e6a-4387-bff1-8e114a543ed4",
+              "name": "prompt",
+              "value": "=You are an academic literature analyst. Analyze the document provided in the next message. Expected document types: research abstracts, literature reviews, thesis summaries, and conference papers.\n\nReturn ONLY a JSON object with exactly this structure:\n{\n  \"summary\": \"2-3 sentence plain-language summary of the research: question, approach, and main finding\",\n  \"classification\": \"one of: [research_abstract, literature_review, thesis_summary, conference_paper, other]\",\n  \"sentiment\": \"one of: [positive, neutral, negative] - direction of the findings: positive = supports/confirms the hypothesis, neutral = mixed or inconclusive, negative = refutes or finds no effect\",\n  \"entities\": {\n    \"authors\": [\"author names\"],\n    \"institutions\": [\"universities, labs, or affiliations\"],\n    \"keywords\": [\"key topics, concepts, or research field\"],\n    \"methods\": [\"methodologies, e.g. randomized trial, regression, survey, meta-analysis\"],\n    \"datasets\": [\"named datasets, samples, or data sources used\"],\n    \"citations\": [\"key prior works or references named in the text\"]\n  },\n  \"action_items\": [\"follow-ups a researcher would take, e.g. read cited work X, address stated research gap, replicate on larger sample\"],\n  \"confidence_score\": 0.0\n}\n\nRules:\n- confidence_score is your confidence in the classification, from 0.0 to 1.0.\n- Use empty arrays [] when a field has no values. Do not invent data (especially author names or citations).\n- Output raw JSON only - no markdown fences, no text before or after the JSON.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        688,
+        176
+      ],
+      "id": "0642f092-3c6b-47fd-beb7-c83e54e6a00e",
+      "name": "Set Gemini Prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-goog-api-key",
+              "value": "###"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{ \"text\": {{ JSON.stringify($json.prompt) }} },\n        {\n          \"text\": {{ JSON.stringify($('Merge').item.json.data) }}\n          }]\n  }],\n  \"generationConfig\": {\n    \"temperature\": 0.2,\n    \"responseMimeType\": \"application/json\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        848,
+        368
+      ],
+      "id": "505c5087-a11f-4c3f-8c1a-ad81a82caf1f",
+      "name": "Gemini request",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://enrichapi:6789/enrich",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1296,
+        368
+      ],
+      "id": "bb7c1bda-8fcf-4e23-a3fd-344a5f4f500b",
+      "name": "Enrich"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "845edee2-6510-47a1-897e-3dc9f4b991de",
+              "name": "text",
+              "value": "={{ $json.candidates[0].content.parts[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "d2e15f21-e5ab-4060-895a-303290b6e364",
+              "name": "parsedData",
+              "value": "={{JSON.parse($json.candidates[0].content.parts[0].text)}}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1072,
+        368
+      ],
+      "id": "849fbd06-9f89-4ba6-a1ee-dffe6480ee5e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1wa8HhTd2VOR1J6B2q5gx3mqUijN-SXbzsyPRa23A7sc",
+          "mode": "list",
+          "cachedResultName": "N8n processed documents",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wa8HhTd2VOR1J6B2q5gx3mqUijN-SXbzsyPRa23A7sc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Main list",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wa8HhTd2VOR1J6B2q5gx3mqUijN-SXbzsyPRa23A7sc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "document_id (UUID)": "={{ $json.document_id }}",
+            "classification and department": "={{ $('Edit Fields').item.json.parsedData.classification }}/{{ $json.department }}",
+            "sentiment and confidence_score": "={{ $('Edit Fields').item.json.parsedData.sentiment }}/{{ $('Edit Fields').item.json.parsedData.confidence_score }}",
+            "processed_at": "={{ $json.processed_at }}",
+            "routing_tag and sensitivity": "={{ $json.routing_tag }}",
+            "filename and file type": "={{ $('Google Drive Trigger').item.json.name }}",
+            "summary (truncated to 500 chars)": "={{ $('Edit Fields').item.json.parsedData?.summary?.substring(0, 500) }}",
+            "action_items (as comma-separated text)": "={{ $('Edit Fields').item.json.parsedData.action_items?.join(',') }}"
+          },
+          "matchingColumns": [
+            "document_id (UUID)"
+          ],
+          "schema": [
+            {
+              "id": "document_id (UUID)",
+              "displayName": "document_id (UUID)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "filename and file type",
+              "displayName": "filename and file type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "processed_at",
+              "displayName": "processed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "classification and department",
+              "displayName": "classification and department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sentiment and confidence_score",
+              "displayName": "sentiment and confidence_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "summary (truncated to 500 chars)",
+              "displayName": "summary (truncated to 500 chars)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "routing_tag and sensitivity",
+              "displayName": "routing_tag and sensitivity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "action_items (as comma-separated text)",
+              "displayName": "action_items (as comma-separated text)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1520,
+        368
+      ],
+      "id": "75bcaf7f-6c76-4842-aa6a-1a0858cb4f95",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mE7PJCrEcmGdGho4",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ashebushev.lt@gmail.com",
+        "subject": "File is processed by n8n job",
+        "message": "=Subject: [{{$('Edit Fields').item.json.parsedData.classification}}] New document processed: {{$json['filename and file type']}}\n\n\nBody (HTML):\n<h2>Document Processed</h2>\n<p><b>File:</b> {{$json['filename and file type']}}</p>\n<p><b>Classification:</b> {{$('Edit Fields').item.json.parsedData.classification}}</p>\n<p><b>Sentiment:</b> {{$('Edit Fields').item.json.parsedData.sentiment}}</p>\n<p><b>Department:</b> {{$('Enrich').item.json.department}}</p>\n<p><b>Sensitivity:</b> {{$('Enrich').item.json.sensitivity}}</p>\n<p><b>Routing tag:</b> {{$('Enrich').item.json.routing_tag}}</p>\n<h3>Summary</h3>\n<p>{{$json['summary (truncated to 500 chars)']}}</p>\n<h3>Action items</h3>\n<p>{{$json['action_items (as comma-separated text)']}}</p>\n<hr>\n<p><i>Sent automatically by n8n + Gemini 3 Document Analyst</i></p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1744,
+        368
+      ],
+      "id": "1cb9c2b6-5167-48c2-b91e-d8a02ccb5e82",
+      "name": "Send a message",
+      "webhookId": "f2385ef8-1b53-4a4e-b1b4-61ff6f9dccd5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MdQryv6PGAINQLkk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "# n8n Code node — Language: Python (native runner), \"Run Once for All Items\"\n# Extracts text from an inline-binary PDF using PyMuPDF (fitz).\n#\n# PyMuPDF is NOT stdlib — the native runner needs:\n#   1. custom image:  FROM n8nio/runners:latest\n#                     RUN /opt/runners/task-runner-python/.venv/bin/pip install --no-cache-dir PyMuPDF\n#   2. allowlist:     N8N_RUNNERS_EXTERNAL_ALLOW=pymupdf\n\nimport base64\n\nimport fitz  # PyMuPDF\n\nBINARY_PROPERTY = \"data\"  # binary property holding the .pdf; change if yours differs\n\n\ndef extract_text(pdf_bytes):\n    \"\"\"Pull text out of a PDF, page by page, in reading order.\"\"\"\n    pages = []\n    doc = fitz.open(stream=pdf_bytes, filetype=\"pdf\")\n    try:\n        for page in doc:\n            pages.append(page.get_text(\"text\"))\n    finally:\n        doc.close()\n    return \"\\n\".join(pages)\n\n\noutput = []\n\nfor item in _items:\n    binary = item.get(\"binary\") or {}\n    entry = binary.get(BINARY_PROPERTY)\n    if not entry or not entry.get(\"data\"):\n        raise ValueError(\n            \"No binary data found on property '%s'. \"\n            \"Check the binary property name.\" % BINARY_PROPERTY\n        )\n\n    pdf_bytes = base64.b64decode(entry[\"data\"])\n    text = extract_text(pdf_bytes)\n\n    output.append({\"json\": {\"text\": text}})\n\nreturn output"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        272
+      ],
+      "id": "2be5d7fb-2e1e-4ff2-af18-07e41a03524b",
+      "name": "Extract text from pdf"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6cb28b04-c952-43a7-bb7b-3103f8774e22",
+              "name": "data",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        272,
+        272
+      ],
+      "id": "0947dd34-e643-4c14-9ab3-a444b3fd78b4",
+      "name": "Set pdf file to output"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "# ============================================================\n# n8n Code node — Language: Python (native runner)\n# Mode: \"Run Once for All Items\"\n#\n# Extracts text from a .docx file provided as inline binary.\n#\n# Works when n8n stores binary IN MEMORY (N8N_DEFAULT_BINARY_DATA_MODE=default),\n# so item[\"binary\"][\"<property>\"][\"data\"] is the base64 of the file itself\n# (first chars \"UEsDBBQ...\", which decodes to PK\\x03\\x04 — a zip/.docx).\n#\n# If you ever switch to filesystem/S3 binary mode, that \"data\" field becomes\n# a reference string (\"filesystem-v2\") instead of base64 — then put an\n# \"Extract from File\" node (Move File to Base64 String) before this one and\n# read item[\"json\"][...] instead.\n#\n# Needs these stdlib modules allowed (N8N_RUNNERS_STDLIB_ALLOW):\n#     base64, io, zipfile, xml\n# ============================================================\n\nimport base64\nimport io\nimport zipfile\nimport xml.etree.ElementTree as ET\n\n# Binary property that holds the .docx file. Change if yours differs.\nBINARY_PROPERTY = \"data\"\n\nWORD_NS = \"{http://schemas.openxmlformats.org/wordprocessingml/2006/main}\"\n\n\ndef extract_text(docx_bytes):\n    \"\"\"Pull paragraph text out of a .docx (a zip of XML parts).\"\"\"\n    paragraphs = []\n    with zipfile.ZipFile(io.BytesIO(docx_bytes)) as z:\n        with z.open(\"word/document.xml\") as f:\n            tree = ET.parse(f)\n    for para in tree.getroot().iter(WORD_NS + \"p\"):\n        texts = [node.text for node in para.iter(WORD_NS + \"t\") if node.text]\n        paragraphs.append(\"\".join(texts))\n    return \"\\n\".join(paragraphs)\n\n\noutput = []\n\nfor item in _items:\n    binary = item.get(\"binary\") or {}\n    entry = binary.get(BINARY_PROPERTY)\n    if not entry or not entry.get(\"data\"):\n        raise ValueError(\n            \"No binary data found on property '%s'. \"\n            \"Check the binary property name.\" % BINARY_PROPERTY\n        )\n\n    docx_bytes = base64.b64decode(entry[\"data\"])\n    text = extract_text(docx_bytes)\n\n    output.append({\"json\": {\"text\": text}})\n\nreturn output\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        464
+      ],
+      "id": "a1e30446-166d-4d47-b1a3-7d5cedb3d477",
+      "name": "Extract text from docs"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -432,
+        256
+      ],
+      "id": "69bacf95-f8e3-4fce-bcac-071e69cef718",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GaAVd5sf780yiz27",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract text from pdf",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract text from docs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Set Gemini Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set file content to output": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Set Gemini Prompt": {
+      "main": [
+        [
+          {
+            "node": "Gemini request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Enrich",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract text from pdf": {
+      "main": [
+        [
+          {
+            "node": "Set pdf file to output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set pdf file to output": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Extract text from docs": {
+      "main": [
+        [
+          {
+            "node": "Set file content to output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "76f08e8f-c1d8-4e87-8c36-1c065b2e374f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5feb8fa20770ef62c5c5c8ca1c7e3d520af68370f2702104400e7a9d2d92fd59"
+  },
+  "nodeGroups": [],
+  "id": "uQmQaq0zemmPsm4W",
+  "tags": []
+}

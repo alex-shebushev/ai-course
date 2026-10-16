@@ -1,0 +1,25 @@
+# Custom n8n task-runners image: adds PyMuPDF to the native Python runner.
+#
+# The stock n8nio/runners image ships a fixed venv at
+# /opt/runners/task-runner-python/.venv with no third-party packages, and
+# there is no runtime pip install from a Code node — so bake PyMuPDF in here.
+#
+# The image tag MUST match the n8n/runners tag used in docker-compose.yml
+# (both are :latest there). Bump this together with them.
+FROM n8nio/runners:latest
+
+USER root
+
+# Install PyMuPDF into the Python runner's own virtualenv so `import fitz`
+# resolves when a Code node runs.
+#
+# The runner's venv is uv-managed and has NO pip inside it, so use the `uv`
+# that ships on the image and target the venv's interpreter directly. Running
+# as root (above) is required to write into the image's site-packages.
+RUN uv pip install \
+        --python /opt/runners/task-runner-python/.venv/bin/python \
+        --no-cache \
+        "PyMuPDF==1.24.14"
+
+# Drop back to the unprivileged runtime user the base image uses.
+USER runner
