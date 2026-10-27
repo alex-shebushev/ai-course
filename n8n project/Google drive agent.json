@@ -137,7 +137,7 @@
             },
             {
               "name": "x-goog-api-key",
-              "value": "###"
+              "value": "#########"
             }
           ]
         },
@@ -173,7 +173,9 @@
         368
       ],
       "id": "bb7c1bda-8fcf-4e23-a3fd-344a5f4f500b",
-      "name": "Enrich"
+      "name": "Enrich",
+      "retryOnFail": true,
+      "executeOnce": false
     },
     {
       "parameters": {
@@ -326,7 +328,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1520,
+        1744,
         368
       ],
       "id": "75bcaf7f-6c76-4842-aa6a-1a0858cb4f95",
@@ -348,7 +350,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1744,
+        1968,
         368
       ],
       "id": "1cb9c2b6-5167-48c2-b91e-d8a02ccb5e82",
@@ -430,6 +432,40 @@
       ],
       "id": "69bacf95-f8e3-4fce-bcac-071e69cef718",
       "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GaAVd5sf780yiz27",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "={{ JSON.stringify($('Gemini request').item.json.candidates[0].content.parts[0].text) }}",
+        "name": "=Summary of {{ $('Google Drive Trigger').item.json.originalFilename.split('.').slice(0, -1).join('.') }}-{{$now.toFormat('yyyy-MM-dd_HH-mm-ss')}}.txt",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1wRn1_u0ol0Fb0qsZlGusLpFHGW3xbqcM",
+          "mode": "list",
+          "cachedResultName": "output_docs",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1wRn1_u0ol0Fb0qsZlGusLpFHGW3xbqcM"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1520,
+        368
+      ],
+      "id": "9858b5e9-124e-4ba7-9c22-ab9799e030f1",
+      "name": "Create file from text",
       "credentials": {
         "googleDriveOAuth2Api": {
           "id": "GaAVd5sf780yiz27",
@@ -535,7 +571,7 @@
       "main": [
         [
           {
-            "node": "Append or update row in sheet",
+            "node": "Create file from text",
             "type": "main",
             "index": 0
           }
@@ -607,6 +643,17 @@
           }
         ]
       ]
+    },
+    "Create file from text": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -614,7 +661,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "76f08e8f-c1d8-4e87-8c36-1c065b2e374f",
+  "versionId": "805401db-61ef-43bf-bcd4-ecd4704159f2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "5feb8fa20770ef62c5c5c8ca1c7e3d520af68370f2702104400e7a9d2d92fd59"

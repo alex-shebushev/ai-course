@@ -7,11 +7,55 @@ import uuid, datetime
 app = FastAPI()
 
 
+CATEGORIES = [
+    'research_abstract',
+    'literature_review',
+    'thesis_summary',
+    'conference_paper',
+]
+
+
 class GeminiResult(BaseModel):
     classification: str
     sentiment: str
     confidence_score: float
     entities: dict
+
+
+class SensitivityRequest(BaseModel):
+    classification: str
+    confidence_score: float
+
+
+@app.get('/health')
+def health():
+    return {'status': 'ok'}
+
+
+@app.get('/categories')
+def categories():
+    return {'categories': CATEGORIES}
+
+
+@app.post('/sensitivity')
+def sensitivity(data: SensitivityRequest):
+    confidential = {'thesis_summary'}
+    internal = {'research_abstract', 'literature_review', 'conference_paper'}
+
+    if data.classification in confidential:
+        level = 'confidential'
+    elif data.classification in internal:
+        level = 'internal'
+    else:
+        level = 'public'
+
+    return {
+        'classification': data.classification,
+        'sensitivity': level,
+        'confidence_score': data.confidence_score,
+        'evaluated_at': datetime.datetime.utcnow().isoformat(),
+    }
+
 
 @app.post('/enrich')
 def enrich(data: GeminiResult):
