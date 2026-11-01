@@ -24,10 +24,10 @@
       "type": "n8n-nodes-base.googleDriveTrigger",
       "typeVersion": 1,
       "position": [
-        -624,
-        256
+        -752,
+        240
       ],
-      "id": "d6f360ee-a277-44a2-84e0-be0bc5768ce0",
+      "id": "ff98a235-39a2-4c88-8a7e-5c24e26816f7",
       "name": "Google Drive Trigger",
       "credentials": {
         "googleDriveOAuth2Api": {
@@ -45,10 +45,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        -272,
-        240
+        -400,
+        224
       ],
-      "id": "6051b2b4-8cff-4895-9a7b-a07600ecc80a",
+      "id": "43defd97-d4bb-4091-a47f-bf01ca072d35",
       "name": "Switch"
     },
     {
@@ -58,10 +58,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        512,
-        288
+        384,
+        272
       ],
-      "id": "bdf9218f-9d10-4998-aee5-0e3887deb224",
+      "id": "e34c8a2b-f6e2-4652-ab2d-d086c72f1ed1",
       "name": "Merge"
     },
     {
@@ -72,11 +72,13 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        128,
-        16
+        -48,
+        -160
       ],
-      "id": "563bc3cb-327c-4edc-8788-8bd1d347409c",
-      "name": "Extract from File"
+      "id": "6715e94a-be0b-4398-93d1-bfd991b08f80",
+      "name": "Extract from File",
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -95,10 +97,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        272,
-        464
+        144,
+        448
       ],
-      "id": "86f38d6a-ce59-44ac-b37e-1ece0e65ca7f",
+      "id": "a28d5f5c-45ba-4ddb-a653-e86b7ecc0daa",
       "name": "Set file content to output"
     },
     {
@@ -118,10 +120,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        688,
-        176
+        560,
+        160
       ],
-      "id": "0642f092-3c6b-47fd-beb7-c83e54e6a00e",
+      "id": "33ef0855-1898-4deb-95e3-98d8f77a1aeb",
       "name": "Set Gemini Prompt"
     },
     {
@@ -137,7 +139,7 @@
             },
             {
               "name": "x-goog-api-key",
-              "value": "#########"
+              "value": "#####"
             }
           ]
         },
@@ -149,12 +151,13 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        848,
-        368
+        720,
+        352
       ],
-      "id": "505c5087-a11f-4c3f-8c1a-ad81a82caf1f",
+      "id": "42448ef3-83f6-4402-955f-1f52f4e6637f",
       "name": "Gemini request",
-      "retryOnFail": true
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -169,13 +172,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        1296,
-        368
+        1168,
+        352
       ],
-      "id": "bb7c1bda-8fcf-4e23-a3fd-344a5f4f500b",
+      "id": "c94dbb20-5c65-4cd9-a6ad-0bcecff16767",
       "name": "Enrich",
       "retryOnFail": true,
-      "executeOnce": false
+      "executeOnce": false,
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -200,10 +204,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        1072,
-        368
+        944,
+        352
       ],
-      "id": "849fbd06-9f89-4ba6-a1ee-dffe6480ee5e",
+      "id": "601f0b88-98d3-4b6a-b67f-371b896cd27a",
       "name": "Edit Fields"
     },
     {
@@ -328,10 +332,10 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1744,
-        368
+        2048,
+        208
       ],
-      "id": "75bcaf7f-6c76-4842-aa6a-1a0858cb4f95",
+      "id": "698c290e-1748-4a03-b53c-dbdf5043a36a",
       "name": "Append or update row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -350,12 +354,13 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1968,
-        368
+        2224,
+        352
       ],
-      "id": "1cb9c2b6-5167-48c2-b91e-d8a02ccb5e82",
+      "id": "329f26dc-ffea-4fbf-a784-2a289c099d37",
       "name": "Send a message",
       "webhookId": "f2385ef8-1b53-4a4e-b1b4-61ff6f9dccd5",
+      "retryOnFail": true,
       "credentials": {
         "gmailOAuth2": {
           "id": "MdQryv6PGAINQLkk",
@@ -371,11 +376,12 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        32,
-        272
+        -48,
+        240
       ],
-      "id": "2be5d7fb-2e1e-4ff2-af18-07e41a03524b",
-      "name": "Extract text from pdf"
+      "id": "9574fe6d-7d51-4a8f-9633-bf480beb57be",
+      "name": "Extract text from pdf",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -394,10 +400,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        272,
-        272
+        144,
+        256
       ],
-      "id": "0947dd34-e643-4c14-9ab3-a444b3fd78b4",
+      "id": "d4c97a99-43df-4b6f-aeca-be6abe5e4184",
       "name": "Set pdf file to output"
     },
     {
@@ -408,11 +414,12 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        32,
-        464
+        -48,
+        592
       ],
-      "id": "a1e30446-166d-4d47-b1a3-7d5cedb3d477",
-      "name": "Extract text from docs"
+      "id": "8d4ec7e0-b659-4426-9009-13c523f241b3",
+      "name": "Extract text from docs",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -427,17 +434,18 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        -432,
-        256
+        -560,
+        240
       ],
-      "id": "69bacf95-f8e3-4fce-bcac-071e69cef718",
+      "id": "cc7b9165-58e4-4a97-ad50-3f949478ef94",
       "name": "Download file",
       "credentials": {
         "googleDriveOAuth2Api": {
           "id": "GaAVd5sf780yiz27",
           "name": "Google Drive account"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -461,15 +469,215 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1520,
-        368
+        1392,
+        352
       ],
-      "id": "9858b5e9-124e-4ba7-9c22-ab9799e030f1",
+      "id": "4a05dbf1-7e14-4607-9271-4f7533031b73",
       "name": "Create file from text",
       "credentials": {
         "googleDriveOAuth2Api": {
           "id": "GaAVd5sf780yiz27",
           "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Gemini request').item.json.candidates[0].content.parts[0].text }}",
+        "options": {
+          "systemMessage": ""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1616,
+        352
+      ],
+      "id": "6cb346c6-45f6-4720-830b-4ff59aca6efc",
+      "name": "AI Agent",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        1488,
+        560
+      ],
+      "id": "dd1f3255-ca3e-453e-9988-62586499793c",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "1lXOgk83RfCQz0yd",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "={{ $json.output }}",
+        "name": "=Markdown of {{ $('Google Drive Trigger').item.json.originalFilename.split('.').slice(0, -1).join('.') }}-{{$now.toFormat('yyyy-MM-dd_HH-mm-ss')}}.md",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1wRn1_u0ol0Fb0qsZlGusLpFHGW3xbqcM",
+          "mode": "list",
+          "cachedResultName": "output_docs",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1wRn1_u0ol0Fb0qsZlGusLpFHGW3xbqcM"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1904,
+        400
+      ],
+      "id": "28bcec7d-13ea-4de7-83e6-9509415f9de9",
+      "name": "Create file from text(markdown)",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "GaAVd5sf780yiz27",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "ashebushev.lt@gmail.com",
+        "subject": "Error on file file downlaoding ",
+        "message": "=<div style=\"font-family: Arial, Helvetica, sans-serif; color: #333333; line-height: 1.5;\">\n  <p style=\"font-size: 16px; font-weight: bold; color: #c0392b;\">\n    ⚠️ File download failed\n  </p>\n\n  <p>Hello,</p>\n\n  <p>The automated workflow was unable to download the following file:</p>\n\n  <ul>\n    <li><strong>File:</strong> {{ $('Google Drive Trigger').item.json.name }}</li>\n    <li><strong>Attempted at:</strong> {{ $now }}</li>\n  </ul>\n  <p>\n    As a result, no Markdown summary was generated for this file.\n    The workflow has stopped at the download step.\n  </p>\n\n  <p>\n    Please check that the source is reachable and the file still exists,\n    then re-run the workflow. If the problem continues, review the download\n    node configuration.\n  </p>\n\n  <p style=\"color: #888888; font-size: 13px;\">\n    This is an automated message — no reply is needed.\n  </p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -432,
+        480
+      ],
+      "id": "d6d2320d-86a2-41b7-91fc-464406844736",
+      "name": "Send a message1",
+      "webhookId": "0ca51cd7-8ab8-4deb-a15e-3823a58cea97",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MdQryv6PGAINQLkk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ashebushev.lt@gmail.com",
+        "subject": "=Erorr on extraction text from {{$('Google Drive Trigger').item.json.name}}",
+        "emailType": "text",
+        "message": "=Error on retreive text datat from {{ $('Google Drive Trigger').item.json.name }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        80
+      ],
+      "id": "650fd72f-c8bb-41ce-8bc1-e65b579af2d8",
+      "name": "Send error on text parsing",
+      "webhookId": "9a137064-40a4-498d-854d-a7bd2e6ed9e9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MdQryv6PGAINQLkk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ashebushev.lt@gmail.com",
+        "subject": "=Error on retieve text from pdf - {{ $('Google Drive Trigger').item.json.name }}",
+        "emailType": "text",
+        "message": "=Error on retrieve data from pdf -  {{ $('Google Drive Trigger').item.json.name }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        416
+      ],
+      "id": "edb205c8-d17d-4059-a307-d7920995a5b1",
+      "name": "Send error on pdf parsing",
+      "webhookId": "1d40426b-4a32-4163-b4b4-e605a37dd475",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MdQryv6PGAINQLkk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ashebushev.lt@gmail.com",
+        "subject": "=Error on parsing content via Gemini -{{ $('Google Drive Trigger').item.json.name }}",
+        "emailType": "text",
+        "message": "=Error on parsing content via Gemini -{{ $('Google Drive Trigger').item.json.name }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        496
+      ],
+      "id": "30a44dc9-c4a6-4dc0-a2cf-84c7003adb10",
+      "name": "Send error on accessing Gemini",
+      "webhookId": "67e0d76a-6fa1-4738-87ea-a692ed2eeece",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MdQryv6PGAINQLkk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ashebushev.lt@gmail.com",
+        "subject": "=Error on extraction of text from doc -  {{ $('Google Drive Trigger').item.json.name }}",
+        "emailType": "text",
+        "message": "=Error on extraction of text from doc -  {{ $('Google Drive Trigger').item.json.name }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        688
+      ],
+      "id": "24467502-f36b-43c9-8174-3474152a4d3f",
+      "name": "Send error on doc parsing",
+      "webhookId": "b2d154b8-5ecf-460f-80b8-eff80015c55a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MdQryv6PGAINQLkk",
+          "name": "Gmail account"
         }
       }
     }
@@ -531,6 +739,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Send error on text parsing",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -561,6 +776,13 @@
         [
           {
             "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send error on accessing Gemini",
             "type": "main",
             "index": 0
           }
@@ -608,6 +830,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Send error on pdf parsing",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -630,6 +859,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Send error on doc parsing",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -641,10 +877,50 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Create file from text": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create file from text(markdown)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create file from text(markdown)": {
       "main": [
         [
           {
@@ -661,12 +937,12 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "805401db-61ef-43bf-bcd4-ecd4704159f2",
+  "versionId": "283edd98-283a-417d-a82c-60fb1c2c9a74",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "5feb8fa20770ef62c5c5c8ca1c7e3d520af68370f2702104400e7a9d2d92fd59"
   },
   "nodeGroups": [],
-  "id": "uQmQaq0zemmPsm4W",
+  "id": "2GroMargE2E1A8CL",
   "tags": []
 }
